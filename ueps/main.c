@@ -11,6 +11,8 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 int LINESIZE = 4096;
 
@@ -91,14 +93,18 @@ int convert_to_int(char *element) {
   return (int)(strtoimax(temp, NULL, 10));
 }
 
-void initialize(char *element) {
-  for (int i = 0; i < LINESIZE; i++) {
-    element[i] = '\0';
-  }
+double get_time()
+{
+  struct timeval t;
+  struct timezone tzp;
+  gettimeofday(&t, &tzp);
+  return t.tv_sec + t.tv_usec*1e-6;
 }
 
 int main(int argc, const char * argv[])
 {
+  float startTime = (float)clock()/CLOCKS_PER_SEC;
+  double start = get_time();
   const char * file_compras = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/compras.csv";
   const char * file_vales = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/vales.csv";
   FILE *iofile_compras;
@@ -155,6 +161,15 @@ int main(int argc, const char * argv[])
   quick_sort(compras_vales, n);
   
   printf("Ending.\n");
+  
+  double finish = get_time();
+  float endTime = (float)clock()/CLOCKS_PER_SEC;
+  
+  printf("Time Elapsed 1: %f \n", finish - start);
+  printf("Time Elapsed 2: %f \n", endTime - startTime);
+  
+  
+  
   return 0;
 }
 
