@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		502EEE6718E2E17C0099CD43 /* vales.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = vales.csv; sourceTree = "<group>"; };
 		5031185F18E21A37003B4FAB /* ueps */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ueps; sourceTree = BUILT_PRODUCTS_DIR; };
 		5031186218E21A37003B4FAB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		5031186418E21A37003B4FAB /* ueps.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ueps.1; sourceTree = "<group>"; };
@@ -61,6 +62,7 @@
 		5031186118E21A37003B4FAB /* ueps */ = {
 			isa = PBXGroup;
 			children = (
+				502EEE6718E2E17C0099CD43 /* vales.csv */,
 				5031186D18E22327003B4FAB /* compras.csv */,
 				5031186218E21A37003B4FAB /* main.c */,
 				5031186418E21A37003B4FAB /* ueps.1 */,
@@ -229,6 +231,7 @@
 				5031186A18E21A37003B4FAB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

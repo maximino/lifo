@@ -10,30 +10,32 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <ctype.h>
+#include <string.h>
 
 int LINESIZE = 4096;
 
-struct Compra {
+struct CompraVale {
   int fecha;
   int id;
+  char kind;
 };
 
-void quick_sort (int *a, int n) {
+void quick_sort (struct CompraVale *a, int n) {
   if (n < 2)
     return;
-  int p = a[n / 2];
-  int *l = a;
-  int *r = a + n - 1;
+  int p = a[n / 2].fecha;
+  struct CompraVale *l = a;
+  struct CompraVale *r = a + n - 1;
   while (l <= r) {
-    if (*l > p) {
+    if (l->fecha > p) {
       l++;
       continue;
     }
-    if (*r < p) {
+    if (r->fecha < p) {
       r--;
       continue; // we need to check the condition (l <= r) every time we change the value of l or r
     }
-    int t = *l;
+    struct CompraVale t = *l;
     *l++ = *r;
     *r-- = t;
   }
@@ -48,7 +50,7 @@ int extract_date (int * date) {
   return 10000 * year + 100 * month + day;
 }
 
-void extract_element_from_line(char *line, char *element, int column) {
+void extract_element_from_line(char * line, char * element, int column) {
   int i = 0, count = 0, count_column = 0, count_column_separator = 0;
   char ch = line[count];
   
@@ -72,13 +74,12 @@ void extract_element_from_line(char *line, char *element, int column) {
   for (int j = 0; j <= 4; j++) {
     element[i-j]= '\0';
   }
-  printf ( "%s\n", element);
 }
 
 int convert_to_int(char *element) {
-  int i = 0, j = 0;
-  char temp[LINESIZE], ch = element[i++];
-
+  int j = 0, i = 0;
+  char ch = element[i++];
+  char temp[LINESIZE];
   
   while (ch != '\0') {
     if(isdigit(ch)) {
@@ -86,22 +87,33 @@ int convert_to_int(char *element) {
     }
     ch = element[i++];
   }
-  printf ( "%s\n", temp);
+  temp[j] = '\0';
   return (int)(strtoimax(temp, NULL, 10));
+}
+
+void initialize(char *element) {
+  for (int i = 0; i < LINESIZE; i++) {
+    element[i] = '\0';
+  }
 }
 
 int main(int argc, const char * argv[])
 {
   const char * file_compras = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/compras.csv";
+  const char * file_vales = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/vales.csv";
   FILE *iofile_compras;
+  FILE *iofile_vales;
   int ch;
   char line[LINESIZE];
   char element[LINESIZE];
-  int dates[10000] = {0};
+  struct CompraVale compras_vales[32768] = {0};
   int index = 0, i = 0;
   
   if ((iofile_compras = fopen(file_compras, "r")) == NULL) {
     fprintf(stderr, "Could not open '%s' for input.\n", file_compras);
+  }
+  else if ((iofile_vales = fopen(file_vales, "r")) == NULL) {
+    fprintf(stderr, "Could not open '%s' for input.\n", file_vales);
   }
   else {
     while ((ch = getc(iofile_compras)) != EOF) {
@@ -111,19 +123,37 @@ int main(int argc, const char * argv[])
       else {
         line[index] = '\0';
         index = 0;
+        compras_vales[i].kind = 'c';
+        extract_element_from_line(line, element, 0);
+        compras_vales[i].id = convert_to_int(element);
         extract_element_from_line(line, element, 1);
-        dates[i++] = convert_to_int(element);
+        compras_vales[i++].fecha = convert_to_int(element);
+      }
+      
+    }
+    while ((ch = getc(iofile_vales)) != EOF) {
+      if ( ch != '\n'){
+        line[index++] = ch;
+      }
+      else {
+        line[index] = '\0';
+        index = 0;
+        compras_vales[i].kind = 'v';
+        extract_element_from_line(line, element, 0);
+        compras_vales[i].id = convert_to_int(element);
+        extract_element_from_line(line, element, 1);
+        compras_vales[i++].fecha = convert_to_int(element);
       }
     }
     fclose(iofile_compras);
+    fclose(iofile_vales);
   }
   
   printf("Sort.\n");
 
-  int n = sizeof dates / sizeof dates[0];
-  quick_sort(dates, n);
+  int n = sizeof compras_vales / sizeof compras_vales[0];
+  quick_sort(compras_vales, n);
   
-  // insert code here...
   printf("Ending.\n");
   return 0;
 }
