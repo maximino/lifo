@@ -26,6 +26,9 @@
 
 /* Begin PBXFileReference section */
 		502EEE6718E2E17C0099CD43 /* vales.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = vales.csv; sourceTree = "<group>"; };
+		502EEE6818E3B6E40099CD43 /* movimientos_compras.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = movimientos_compras.csv; sourceTree = "<group>"; };
+		502EEE6918E3B6E40099CD43 /* articulo_vales.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = articulo_vales.csv; sourceTree = "<group>"; };
+		502EEE6A18E3CE850099CD43 /* articulos.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = articulos.csv; sourceTree = "<group>"; };
 		5031185F18E21A37003B4FAB /* ueps */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ueps; sourceTree = BUILT_PRODUCTS_DIR; };
 		5031186218E21A37003B4FAB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		5031186418E21A37003B4FAB /* ueps.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ueps.1; sourceTree = "<group>"; };
@@ -62,8 +65,11 @@
 		5031186118E21A37003B4FAB /* ueps */ = {
 			isa = PBXGroup;
 			children = (
-				502EEE6718E2E17C0099CD43 /* vales.csv */,
+				502EEE6A18E3CE850099CD43 /* articulos.csv */,
 				5031186D18E22327003B4FAB /* compras.csv */,
+				502EEE6818E3B6E40099CD43 /* movimientos_compras.csv */,
+				502EEE6718E2E17C0099CD43 /* vales.csv */,
+				502EEE6918E3B6E40099CD43 /* articulo_vales.csv */,
 				5031186218E21A37003B4FAB /* main.c */,
 				5031186418E21A37003B4FAB /* ueps.1 */,
 			);

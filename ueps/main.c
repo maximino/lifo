@@ -15,34 +15,47 @@
 #include <sys/resource.h>
 
 int LINESIZE = 4096;
+const int DATASIZE = 65536;
 
-struct CompraVale {
+struct Consolidado {
+  char kind;
   int fecha;
   int id;
-  char kind;
+  int division_id;
+  int articulo_id;
+  int cantidad;
+  int cv_id;
 };
 
-void quick_sort (struct CompraVale *a, int n) {
-  if (n < 2)
-    return;
-  int p = a[n / 2].fecha;
-  struct CompraVale *l = a;
-  struct CompraVale *r = a + n - 1;
-  while (l <= r) {
-    if (l->fecha > p) {
-      l++;
-      continue;
-    }
-    if (r->fecha < p) {
-      r--;
-      continue; // we need to check the condition (l <= r) every time we change the value of l or r
-    }
-    struct CompraVale t = *l;
-    *l++ = *r;
-    *r-- = t;
+struct CompraVale {
+  int id;
+  int fecha;
+};
+
+struct Articulo {
+  int id;
+  int equivalencia;
+};
+
+int compare(const void *arg1, const void *arg2)
+{
+  struct Consolidado a, b;
+  a = *(struct Consolidado*)arg1;
+  b = *(struct Consolidado*)arg2;
+  
+  if(a.fecha > b.fecha)
+    return 1;
+  else if(a.fecha < b.fecha)
+    return -1;
+  else
+  {
+    if(a.kind > b.kind)
+      return 1;
+    else if(a.kind < b.kind)
+      return -1;
+    else
+      return 0;
   }
-  quick_sort(a, (int)(r - a + 1));
-  quick_sort(l, (int)(a + n - l));
 }
 
 int extract_date (int * date) {
@@ -101,27 +114,103 @@ double get_time()
   return t.tv_sec + t.tv_usec*1e-6;
 }
 
+int search_date(int id, struct CompraVale * compras, int count_compras) {
+  for (int i = 0; i < count_compras; i++) {
+    if (id == compras[i].id)
+      return compras[i].fecha;
+  }
+  return 0;
+}
+
+int get_equivalencia(int id, struct Articulo * articulos, int count_articulos) {
+  for (int i = 0; i < count_articulos; i++) {
+    if (id == articulos[i].id)
+      return articulos[i].equivalencia;
+  }
+  return 0;
+}
+
+
 int main(int argc, const char * argv[])
 {
   float startTime = (float)clock()/CLOCKS_PER_SEC;
   double start = get_time();
   const char * file_compras = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/compras.csv";
+  const char * file_mov_compras = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/movimientos_compras.csv";
   const char * file_vales = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/vales.csv";
+  const char * file_art_vales = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/articulo_vales.csv";
+  const char * file_articulos = "/Users/max/Documents/Work/Code/xcode/lifo/ueps/articulos.csv";
   FILE *iofile_compras;
+  FILE *iofile_mov_compras;
   FILE *iofile_vales;
+  FILE *iofile_art_vales;
+  FILE *iofile_articulos;
   int ch;
   char line[LINESIZE];
   char element[LINESIZE];
-  struct CompraVale compras_vales[32768] = {0};
-  int index = 0, i = 0;
+  struct Consolidado consolidado[DATASIZE] = {};
+  struct CompraVale compras[DATASIZE] = {};
+  struct CompraVale vales[DATASIZE] = {};
+  struct Articulo articulos[DATASIZE] = {};
+  int index = 0, insert_count = 0, count_articulos = 0, count_vales = 0, count_compras = 0;
   
   if ((iofile_compras = fopen(file_compras, "r")) == NULL) {
     fprintf(stderr, "Could not open '%s' for input.\n", file_compras);
   }
+  else if ((iofile_mov_compras = fopen(file_mov_compras, "r")) == NULL) {
+    fprintf(stderr, "Could not open '%s' for input.\n", file_mov_compras);
+  }
   else if ((iofile_vales = fopen(file_vales, "r")) == NULL) {
     fprintf(stderr, "Could not open '%s' for input.\n", file_vales);
   }
+  else if ((iofile_art_vales = fopen(file_art_vales, "r")) == NULL){
+    fprintf(stderr, "Could not open '%s' for input.\n", file_art_vales);
+  }
+  else if ((iofile_articulos = fopen(file_articulos, "r")) == NULL){
+    fprintf(stderr, "Could not open '%s' for input.\n", file_articulos);
+  }
   else {
+    while ((ch = getc(iofile_mov_compras)) != EOF) {
+      if ( ch != '\n'){
+        line[index++] = ch;
+      }
+      else {
+        line[index] = '\0';
+        index = 0;
+        consolidado[insert_count].kind = 'c';
+        extract_element_from_line(line, element, 0);
+        consolidado[insert_count].cv_id = convert_to_int(element);
+        extract_element_from_line(line, element, 1);
+        consolidado[insert_count].id = convert_to_int(element);
+        extract_element_from_line(line, element, 2);
+        consolidado[insert_count].articulo_id = convert_to_int(element);
+        extract_element_from_line(line, element, 6);
+        consolidado[insert_count].cantidad = convert_to_int(element);
+        extract_element_from_line(line, element, 8);
+        consolidado[insert_count++].division_id = convert_to_int(element);
+      }
+      
+    }
+    while ((ch = getc(iofile_art_vales)) != EOF) {
+      if ( ch != '\n'){
+        line[index++] = ch;
+      }
+      else {
+        line[index] = '\0';
+        index = 0;
+        consolidado[insert_count].kind = 'v';
+        extract_element_from_line(line, element, 0);
+        consolidado[insert_count].cv_id = convert_to_int(element);
+        extract_element_from_line(line, element, 1);
+        consolidado[insert_count].id = convert_to_int(element);
+        extract_element_from_line(line, element, 2);
+        consolidado[insert_count].articulo_id = convert_to_int(element);
+        extract_element_from_line(line, element, 5);
+        consolidado[insert_count].cantidad = convert_to_int(element);
+        extract_element_from_line(line, element, 6);
+        consolidado[insert_count++].division_id = convert_to_int(element);
+      }
+    }
     while ((ch = getc(iofile_compras)) != EOF) {
       if ( ch != '\n'){
         line[index++] = ch;
@@ -129,13 +218,11 @@ int main(int argc, const char * argv[])
       else {
         line[index] = '\0';
         index = 0;
-        compras_vales[i].kind = 'c';
         extract_element_from_line(line, element, 0);
-        compras_vales[i].id = convert_to_int(element);
+        compras[count_compras].id = convert_to_int(element);
         extract_element_from_line(line, element, 1);
-        compras_vales[i++].fecha = convert_to_int(element);
+        compras[count_compras++].fecha = convert_to_int(element);
       }
-      
     }
     while ((ch = getc(iofile_vales)) != EOF) {
       if ( ch != '\n'){
@@ -144,31 +231,66 @@ int main(int argc, const char * argv[])
       else {
         line[index] = '\0';
         index = 0;
-        compras_vales[i].kind = 'v';
         extract_element_from_line(line, element, 0);
-        compras_vales[i].id = convert_to_int(element);
+        vales[count_vales].id = convert_to_int(element);
         extract_element_from_line(line, element, 1);
-        compras_vales[i++].fecha = convert_to_int(element);
+        vales[count_vales++].fecha = convert_to_int(element);
       }
     }
+    while ((ch = getc(iofile_articulos)) != EOF) {
+      if ( ch != '\n'){
+        line[index++] = ch;
+      }
+      else {
+        line[index] = '\0';
+        index = 0;
+        extract_element_from_line(line, element, 0);
+        articulos[count_articulos].id = convert_to_int(element);
+        extract_element_from_line(line, element, 11);
+        articulos[count_articulos++].equivalencia = convert_to_int(element);
+      }
+    }
+
     fclose(iofile_compras);
+    fclose(iofile_mov_compras);
     fclose(iofile_vales);
+    fclose(iofile_art_vales);
+  }
+  
+  int id, fecha, equivalencia;
+  char kind;
+  
+  for (int i = 0; i < insert_count; i++) {
+    kind = consolidado[i].kind;
+    if (kind == 'c') {
+      id = consolidado[i].id;
+      fecha = search_date(id, compras, count_compras);
+      equivalencia = get_equivalencia(id, articulos, count_articulos);
+      consolidado[i].fecha = fecha;
+      consolidado[i].cantidad = consolidado[i].cantidad * equivalencia;
+    }
+    else {
+      id = consolidado[i].id;
+      fecha = search_date(id, vales, count_vales);
+      consolidado[i].fecha = fecha;
+    }
   }
   
   printf("Sort.\n");
-
-  int n = sizeof compras_vales / sizeof compras_vales[0];
-  quick_sort(compras_vales, n);
+  
+  qsort(consolidado, DATASIZE, sizeof(consolidado[0]), compare);
   
   printf("Ending.\n");
   
   double finish = get_time();
   float endTime = (float)clock()/CLOCKS_PER_SEC;
   
+  for (int i = 0; i < DATASIZE; i++) {
+    printf("%d. id:%d fecha:%d tipo:%c cantidad:%d articulo:%d\n", i, consolidado[i].id, consolidado[i].fecha, consolidado[i].kind, consolidado[i].cantidad, consolidado[i].articulo_id);
+  }
+  
   printf("Time Elapsed 1: %f \n", finish - start);
   printf("Time Elapsed 2: %f \n", endTime - startTime);
-  
-  
   
   return 0;
 }
