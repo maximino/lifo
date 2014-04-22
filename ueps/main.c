@@ -260,34 +260,37 @@ int main(int argc, const char * argv[])
   int id, fecha, equivalencia;
   char kind;
   
-  for (int i = 0; i < insert_count; i++) {
-    kind = consolidado[i].kind;
+  int rec;
+  for (rec = 0; rec < insert_count; rec++) {
+    kind = consolidado[rec].kind;
     if (kind == 'c') {
-      id = consolidado[i].id;
+      id = consolidado[rec].id;
       fecha = search_date(id, compras, count_compras);
       equivalencia = get_equivalencia(id, articulos, count_articulos);
-      consolidado[i].fecha = fecha;
-      consolidado[i].cantidad = consolidado[i].cantidad * equivalencia;
+      consolidado[rec].fecha = fecha;
+      consolidado[rec].cantidad = consolidado[rec].cantidad * equivalencia;
     }
     else {
-      id = consolidado[i].id;
+      id = consolidado[rec].id;
       fecha = search_date(id, vales, count_vales);
-      consolidado[i].fecha = fecha;
+      consolidado[rec].fecha = fecha;
     }
   }
   
   printf("Sort.\n");
   
-  qsort(consolidado, DATASIZE, sizeof(consolidado[0]), compare);
+  qsort(consolidado, rec, sizeof(consolidado[0]), compare);
   
   printf("Ending.\n");
   
   double finish = get_time();
   float endTime = (float)clock()/CLOCKS_PER_SEC;
   
-  for (int i = 0; i < DATASIZE; i++) {
+  for (int i = 0; i < rec + 1; i++) {
     printf("%d. id:%d fecha:%d tipo:%c cantidad:%d articulo:%d\n", i, consolidado[i].id, consolidado[i].fecha, consolidado[i].kind, consolidado[i].cantidad, consolidado[i].articulo_id);
   }
+  
+  printf("Registros: %d.\n", rec);
   
   printf("Time Elapsed 1: %f \n", finish - start);
   printf("Time Elapsed 2: %f \n", endTime - startTime);
